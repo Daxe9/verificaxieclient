@@ -7,14 +7,16 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.Scanner;
 
-public class Client {
+public class Client extends Thread {
     Socket connection; 
     BufferedReader in;
     DataOutputStream out;
     Scanner scan;
+    SharedResource share;
 
-    public Client(Socket connection) throws IOException {
+    public Client(Socket connection, SharedResource share) throws IOException {
         this.connection = connection;
+        this.share = share;
         in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
         out = new DataOutputStream(connection.getOutputStream());
         scan = new Scanner(System.in);
@@ -40,9 +42,11 @@ public class Client {
             String input = "";
             String serverResponse = "";
             do {
-                serverResponse = in.readLine();
+                System.out.println("Client started");
+                Thread.sleep(1000);
+                serverResponse = share.getMessage();
                 if (serverResponse.equals("d")) {
-                    serverResponse = in.readLine();
+                    serverResponse = share.getMessage();
                     Integer attempts = Integer.parseInt(serverResponse);
                     System.out.println("You guessed the word in " + attempts + " attempts");
                     return;
@@ -66,9 +70,9 @@ public class Client {
                         System.out.println("Inserisci la parola: ");
                         input = getUserInput();
                         out.writeBytes(input + "\n");
-                        serverResponse = in.readLine();
+                        serverResponse = share.getMessage();
                         if (serverResponse.equals("d"))  {
-                            serverResponse = in.readLine();
+                            serverResponse = share.getMessage();
                             Integer attempts = Integer.parseInt(serverResponse);
                             System.out.println("You guessed the word in " + attempts + " attempts");
                             return;
@@ -81,7 +85,10 @@ public class Client {
                     case "C":
                         break; 
                     default:
-                        continue;
+                        System.out.println("Invalid Input");
+                        connection.close();
+                        System.exit(1);
+                        break;
                 }
             } while (!input.equals("C"));
 
