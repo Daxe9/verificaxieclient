@@ -81,6 +81,8 @@ public class Client {
                     case "C":
                         break; 
                     default:
+                        System.out.println("Invalid");
+                        System.exit(1);
                         continue;
                 }
             } while (!input.equals("C"));
